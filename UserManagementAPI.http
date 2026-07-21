@@ -1,0 +1,147 @@
+@UserManagementAPI_HostAddress = http://localhost:5223
+@devToken = dev-hr-token-please-rotate
+
+### Get all users (page 1, default page size 50)
+GET {{UserManagementAPI_HostAddress}}/api/users
+Accept: application/json
+Authorization: Bearer {{devToken}}
+
+### Get all users - no Authorization header (expect 401)
+GET {{UserManagementAPI_HostAddress}}/api/users
+Accept: application/json
+
+### Get all users - garbage token (expect 401)
+GET {{UserManagementAPI_HostAddress}}/api/users
+Accept: application/json
+Authorization: Bearer not-a-real-token
+
+### Get users with explicit paging
+GET {{UserManagementAPI_HostAddress}}/api/users?page=1&pageSize=1
+Accept: application/json
+Authorization: Bearer {{devToken}}
+
+### Get a single user by id
+GET {{UserManagementAPI_HostAddress}}/api/users/1
+Accept: application/json
+Authorization: Bearer {{devToken}}
+
+### Get a user that does not exist (expect 404)
+GET {{UserManagementAPI_HostAddress}}/api/users/999
+Accept: application/json
+Authorization: Bearer {{devToken}}
+
+### Get a user with a malformed id (expect 400, not a bare framework 404)
+GET {{UserManagementAPI_HostAddress}}/api/users/abc
+Accept: application/json
+Authorization: Bearer {{devToken}}
+
+### Create a new user
+POST {{UserManagementAPI_HostAddress}}/api/users
+Content-Type: application/json
+Authorization: Bearer {{devToken}}
+
+{
+  "firstName": "Alan",
+  "lastName": "Turing",
+  "email": "alan.turing@techhive.example",
+  "department": "Engineering"
+}
+
+### Create a user with invalid data (expect 400)
+POST {{UserManagementAPI_HostAddress}}/api/users
+Content-Type: application/json
+Authorization: Bearer {{devToken}}
+
+{
+  "firstName": "",
+  "lastName": "Turing",
+  "email": "not-an-email",
+  "department": "Engineering"
+}
+
+### Create a user with whitespace-only fields (expect 400)
+POST {{UserManagementAPI_HostAddress}}/api/users
+Content-Type: application/json
+Authorization: Bearer {{devToken}}
+
+{
+  "firstName": "   ",
+  "lastName": "Turing",
+  "email": "alan2.turing@techhive.example",
+  "department": "Engineering"
+}
+
+### Create a user whose email has incidental surrounding whitespace (expect 201 - trimmed before validation)
+POST {{UserManagementAPI_HostAddress}}/api/users
+Content-Type: application/json
+Authorization: Bearer {{devToken}}
+
+{
+  "firstName": "Katherine",
+  "lastName": "Johnson",
+  "email": "  katherine.johnson@techhive.example  ",
+  "department": "Engineering"
+}
+
+### Create a user with a duplicate email (expect 409)
+POST {{UserManagementAPI_HostAddress}}/api/users
+Content-Type: application/json
+Authorization: Bearer {{devToken}}
+
+{
+  "firstName": "Grace",
+  "lastName": "Copy",
+  "email": "grace.hopper@techhive.example",
+  "department": "IT"
+}
+
+### Update an existing user
+PUT {{UserManagementAPI_HostAddress}}/api/users/1
+Content-Type: application/json
+Authorization: Bearer {{devToken}}
+
+{
+  "firstName": "Grace",
+  "lastName": "Hopper",
+  "email": "grace.hopper@techhive.example",
+  "department": "Research"
+}
+
+### Update a user that does not exist (expect 404)
+PUT {{UserManagementAPI_HostAddress}}/api/users/999
+Content-Type: application/json
+Authorization: Bearer {{devToken}}
+
+{
+  "firstName": "Nobody",
+  "lastName": "Here",
+  "email": "nobody@techhive.example",
+  "department": "IT"
+}
+
+### Update a user with a malformed id (expect 400)
+PUT {{UserManagementAPI_HostAddress}}/api/users/abc
+Content-Type: application/json
+Authorization: Bearer {{devToken}}
+
+{
+  "firstName": "Nobody",
+  "lastName": "Here",
+  "email": "nobody@techhive.example",
+  "department": "IT"
+}
+
+### Delete a user
+DELETE {{UserManagementAPI_HostAddress}}/api/users/2
+Authorization: Bearer {{devToken}}
+
+### Delete a user that does not exist (expect 404)
+DELETE {{UserManagementAPI_HostAddress}}/api/users/999
+Authorization: Bearer {{devToken}}
+
+### Delete a user with a malformed id (expect 400)
+DELETE {{UserManagementAPI_HostAddress}}/api/users/abc
+Authorization: Bearer {{devToken}}
+
+### Delete a user - no token (expect 401, and this request should never reach the repository)
+DELETE {{UserManagementAPI_HostAddress}}/api/users/1
